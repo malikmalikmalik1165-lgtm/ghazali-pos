@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Printer, BookOpen, Shirt, Star, CreditCard } from 'lucide-react';
+import { Search, Printer, BookOpen, Shirt, Star, CreditCard, ShoppingCart } from 'lucide-react';
 
 const productsList = [
   // --- AFAQ SUN SERIES ---
@@ -84,6 +84,7 @@ export default function App() {
   const [paid, setPaid] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Books");
+  const [showCart, setShowCart] = useState(false);
 
   const addToCart = (p) => {
     const exist = cart.find(x => x.id === p.id);
@@ -97,68 +98,67 @@ export default function App() {
   const total = cart.reduce((a, c) => a + c.price * c.qty, 0);
   const balance = (Number(paid) || 0) - total;
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
-    <div className="flex h-screen bg-black text-slate-300 font-sans overflow-hidden">
+    <div className="min-h-screen bg-black text-slate-300 font-sans flex flex-col md:flex-row overflow-x-hidden">
       
-      {/* SIDEBAR - Hidden on Print */}
-      <div className="w-20 bg-zinc-900 border-r border-zinc-800 flex flex-col items-center py-8 gap-8 print:hidden">
-        <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-          <Star className="text-black fill-black" size={24}/>
+      {/* SIDEBAR - Top on Mobile, Left on Desktop */}
+      <div className="w-full md:w-20 bg-zinc-900 border-b md:border-b-0 md:border-r border-zinc-800 flex md:flex-col items-center py-4 md:py-8 justify-around md:justify-start gap-0 md:gap-8 print:hidden shrink-0">
+        <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+          <Star className="text-black fill-black" size={20}/>
         </div>
-        <button onClick={() => setActiveTab("Books")} className={`p-4 rounded-xl transition-all ${activeTab === "Books" ? "bg-emerald-500/10 text-emerald-500" : "text-zinc-600 hover:text-white"}`}><BookOpen/></button>
-        <button onClick={() => setActiveTab("Uniform")} className={`p-4 rounded-xl transition-all ${activeTab === "Uniform" ? "bg-emerald-500/10 text-emerald-500" : "text-zinc-600 hover:text-white"}`}><Shirt/></button>
+        <button onClick={() => setActiveTab("Books")} className={`p-3 md:p-4 rounded-xl transition-all ${activeTab === "Books" ? "bg-emerald-500/10 text-emerald-500" : "text-zinc-600 hover:text-white"}`}><BookOpen size={20}/></button>
+        <button onClick={() => setActiveTab("Uniform")} className={`p-3 md:p-4 rounded-xl transition-all ${activeTab === "Uniform" ? "bg-emerald-500/10 text-emerald-500" : "text-zinc-600 hover:text-white"}`}><Shirt size={20}/></button>
+        <button onClick={() => setShowCart(!showCart)} className="md:hidden p-3 text-emerald-500 relative">
+          <ShoppingCart size={20}/>
+          {cart.length > 0 && <span className="absolute top-0 right-0 bg-red-500 text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center">{cart.length}</span>}
+        </button>
       </div>
 
-      {/* PRODUCTS SECTION - Hidden on Print */}
-      <div className="flex-1 flex flex-col p-8 overflow-hidden print:hidden">
-        <header className="flex justify-between items-center mb-8">
+      {/* PRODUCTS SECTION */}
+      <div className={`flex-1 flex flex-col p-4 md:p-8 ${showCart ? 'hidden md:flex' : 'flex'} print:hidden`}>
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-2xl font-black text-white tracking-tighter uppercase">GHAZALI BOOK SHOP</h1>
-            <p className="text-emerald-500 text-[9px] font-bold tracking-[0.3em] uppercase">Owner: Malik Zahoor Ahmad</p>
+            <h1 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase">GHAZALI BOOK SHOP</h1>
+            <p className="text-emerald-500 text-[8px] md:text-[9px] font-bold tracking-[0.2em] uppercase">Owner: Malik Zahoor Ahmad</p>
           </div>
-          <div className="relative">
+          <div className="relative w-full md:w-64">
             <Search className="absolute left-4 top-2.5 text-zinc-500" size={16} />
             <input 
               type="text" placeholder="Search..." 
-              className="bg-zinc-900 border border-zinc-800 rounded-lg py-2 pl-10 pr-4 outline-none focus:border-emerald-500 w-64 text-xs"
+              className="bg-zinc-900 border border-zinc-800 rounded-lg py-2 pl-10 pr-4 outline-none focus:border-emerald-500 w-full text-xs"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto grid grid-cols-2 lg:grid-cols-4 gap-4 pr-2">
+        <div className="flex-1 overflow-y-auto grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 pb-20 md:pb-0">
           {productsList
             .filter(p => p.category === activeTab && p.name.toLowerCase().includes(searchTerm.toLowerCase()))
             .map(p => (
-              <button key={p.id} onClick={() => addToCart(p)} className="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl hover:border-emerald-500 transition-all text-left">
-                <h3 className="font-bold text-[10px] text-zinc-400 mb-1 uppercase h-8 overflow-hidden">{p.name}</h3>
-                <p className="text-xl font-black text-white tracking-tighter">Rs.{p.price}</p>
+              <button key={p.id} onClick={() => addToCart(p)} className="bg-zinc-900 border border-zinc-800 p-4 md:p-5 rounded-xl hover:border-emerald-500 transition-all text-left">
+                <h3 className="font-bold text-[9px] md:text-[10px] text-zinc-400 mb-1 uppercase h-8 overflow-hidden line-clamp-2">{p.name}</h3>
+                <p className="text-lg md:text-xl font-black text-white tracking-tighter">Rs.{p.price}</p>
               </button>
             ))}
         </div>
       </div>
 
-      {/* BILLING PANEL & PRINT AREA */}
-      <div className="w-[360px] bg-zinc-900 border-l border-zinc-800 p-6 flex flex-col shadow-2xl print:bg-white print:w-full print:border-none print:p-0 print:absolute print:inset-0 print:z-50">
+      {/* BILLING PANEL */}
+      <div className={`${showCart ? 'flex' : 'hidden'} md:flex w-full md:w-[360px] bg-zinc-900 border-t md:border-t-0 md:border-l border-zinc-800 p-4 md:p-6 flex-col shadow-2xl h-screen md:h-auto fixed md:relative top-0 left-0 z-50 md:z-auto print:bg-white print:w-full print:border-none print:p-0 print:static`}>
         
         <div className="flex justify-between items-center mb-4 print:hidden">
+          <button onClick={() => setShowCart(false)} className="md:hidden text-zinc-500 text-xs">← Back</button>
           <h2 className="text-sm font-black text-white flex items-center gap-2 tracking-widest"><CreditCard size={18}/> SLIP</h2>
-          <button onClick={() => setCart([])} className="text-[9px] text-zinc-500 uppercase hover:text-red-500 font-bold">Clear</button>
+          <button onClick={() => setCart([])} className="text-[9px] text-zinc-500 uppercase font-bold">Clear</button>
         </div>
 
-        {/* THE SLIP */}
-        <div className="flex-1 bg-white rounded-2xl mb-4 overflow-hidden flex flex-col shadow-inner print:shadow-none print:rounded-none">
-          <div id="printable-slip" className="flex-1 overflow-y-auto p-6 bg-white text-black font-mono text-[10px] leading-tight print:overflow-visible">
+        <div className="flex-1 bg-white rounded-xl mb-4 overflow-hidden flex flex-col shadow-inner print:rounded-none print:shadow-none">
+          <div id="printable-slip" className="flex-1 overflow-y-auto p-4 md:p-6 bg-white text-black font-mono text-[10px] leading-tight print:overflow-visible">
             
-            <div className="text-center border-b border-black pb-4 mb-4 uppercase">
-              <h1 className="text-xl font-black tracking-tighter">GHAZALI BOOK SHOP</h1>
-              <p className="text-[9px] font-bold">Owner: Malik Zahoor Ahmad</p>
-              <p className="text-[8px]">Miani, District Sargodha</p>
-              <div className="flex justify-between mt-4 text-[8px] border-t border-black pt-1">
+            <div className="text-center border-b border-black pb-3 mb-4 uppercase">
+              <h1 className="text-lg font-black tracking-tighter">GHAZALI BOOK SHOP</h1>
+              <p className="text-[8px] font-bold">Owner: Malik Zahoor Ahmad</p>
+              <div className="flex justify-between mt-3 text-[7px] border-t border-black pt-1">
                 <span>{new Date().toLocaleDateString()}</span>
                 <span>{new Date().toLocaleTimeString()}</span>
               </div>
@@ -166,7 +166,7 @@ export default function App() {
 
             <table className="w-full mb-4">
               <thead>
-                <tr className="border-b border-black text-left">
+                <tr className="border-b border-black text-left text-[8px]">
                   <th className="pb-1">ITEM</th>
                   <th className="pb-1 text-right">PRICE</th>
                 </tr>
@@ -181,39 +181,38 @@ export default function App() {
               </tbody>
             </table>
 
-            <div className="border-t border-black pt-4 space-y-1">
-              <div className="flex justify-between font-black text-sm">
+            <div className="border-t border-black pt-3 space-y-1">
+              <div className="flex justify-between font-black text-xs">
                 <span>TOTAL:</span>
                 <span>Rs.{total}</span>
               </div>
-              <div className="flex justify-between text-[9px] italic opacity-80">
-                <span>CASH RECEIVED:</span>
+              <div className="flex justify-between text-[8px] italic opacity-80">
+                <span>RECEIVED:</span>
                 <span>Rs.{paid || 0}</span>
               </div>
-              <div className="flex justify-between border-t border-black pt-2 font-black text-base text-black">
+              <div className="flex justify-between border-t border-black pt-1 font-black text-sm">
                 <span>CHANGE:</span>
                 <span>Rs.{balance}</span>
               </div>
             </div>
             
-            <div className="mt-10 text-center border-t border-dashed border-gray-400 pt-6">
+            <div className="mt-8 text-center border-t border-dashed border-gray-400 pt-4">
                <p className="text-[9px] font-black uppercase tracking-widest italic">Designed by Malik Danial</p>
-               <p className="text-[7px] mt-1">Thank you for your visit!</p>
+               <p className="text-[7px] mt-1">Thank you for shopping!</p>
             </div>
           </div>
         </div>
 
-        {/* ACTION PANEL - Hidden on Print */}
-        <div className="space-y-4 print:hidden">
-          <div className="bg-black border border-zinc-800 p-4 rounded-xl flex items-center justify-between">
-            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Received</span>
+        <div className="space-y-3 print:hidden">
+          <div className="bg-black border border-zinc-800 p-3 rounded-lg flex items-center justify-between">
+            <span className="text-[9px] font-black text-zinc-500 uppercase">Received</span>
             <input 
-              type="number" className="bg-transparent text-right outline-none w-24 font-black text-xl text-emerald-500"
+              type="number" className="bg-transparent text-right outline-none w-24 font-black text-lg text-emerald-500"
               placeholder="0" value={paid} onChange={(e) => setPaid(e.target.value)}
             />
           </div>
           <button 
-            onClick={handlePrint} disabled={cart.length === 0}
+            onClick={() => window.print()} disabled={cart.length === 0}
             className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all text-xs uppercase"
           >
             <Printer size={18}/> Print Slip
@@ -221,14 +220,19 @@ export default function App() {
         </div>
       </div>
 
-      {/* Global CSS for Printing */}
       <style>{`
         @media print {
           body * { visibility: hidden; }
           #printable-slip, #printable-slip * { visibility: visible; }
-          #printable-slip { position: absolute; left: 0; top: 0; width: 80mm; }
+          #printable-slip { position: fixed; left: 0; top: 0; width: 80mm; }
         }
         @page { size: auto; margin: 0mm; }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;  
+          overflow: hidden;
+        }
       `}</style>
     </div>
   );
